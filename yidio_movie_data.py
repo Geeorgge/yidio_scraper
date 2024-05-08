@@ -99,13 +99,3 @@ if __name__ == "__main__":
         if movie_info:
             movies_list.append(movie_info)
 
-    for movie in movies_list:
-        movie_data = {
-            'Title': movie.title,
-            'Image': movie.image,
-            'Classification': movie.classification,
-            'Year': movie.year,
-            'length': movie.length,
-            'IMDB Rate': movie.imdb_rating,
-            'Description': movie.description
-        }
