@@ -90,6 +90,18 @@ def get_movie_info(url):
         print("Error fetching the page:", response.status_code)
         return None
 
+def save_movies_info(movies_list):
+    with open("results.txt", "w", encoding="utf-8") as file:
+        for movie in movies_list:
+            file.write(f"Title: {movie.title}\n")
+            file.write(f"Image: {movie.image}\n")
+            file.write(f"Classification: {movie.classification}\n")
+            file.write(f"Year: {movie.year}\n")
+            file.write(f"Duration: {movie.length}\n")
+            file.write(f"IMDB Rate: {movie.imdb_rating}\n")
+            file.write(f"Description: {movie.description}\n\n")
+    print("Movies information saved to movies_info.txt")
+
 if __name__ == "__main__":
     movies_list = []
 
@@ -101,3 +113,4 @@ if __name__ == "__main__":
         if movie_info:
             movies_list.append(movie_info)
 
+    save_movies_info(movies_list)
