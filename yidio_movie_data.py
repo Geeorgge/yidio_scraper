@@ -6,8 +6,10 @@ from yidio_movie import Movie
 def extract_image(soup):
     content_div = soup.find('div', class_='content')
     if content_div:
-        image_src = content_div.select_one('div[class="poster movie"] img')['src'].strip()
-        return image_src
+        image_tag = content_div.select_one('div.poster.movie img')
+        if image_tag and 'src' in image_tag.attrs:
+            image_src = image_tag['src'].strip()
+            return image_src
     return None
 
 def extract_title(soup):
