@@ -1,4 +1,5 @@
 import re
+import csv
 import requests
 from bs4 import BeautifulSoup
 from yidio_movie import Movie
@@ -89,6 +90,29 @@ def get_movie_info(url):
     else:
         print("Error fetching the page:", response.status_code)
         return None
+
+
+def save_to_csv(movies_list):
+    csv_filename = 'movies.csv'
+
+    with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = ['Title', 'Image', 'Classification', 'Year', 'Length', 'IMDB Rate', 'Description']
+
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        
+        for movie in movies_list:
+            writer.writerow({
+                'Title': movie.title,
+                'Image': movie.image,
+                'Classification': movie.classification,
+                'Year': movie.year,
+                'Length': movie.length,
+                'IMDB Rate': movie.imdb_rating,
+                'Description': movie.description
+            })
+
+    print(f"Data saved in {csv_filename}")
 
 
 if __name__ == "__main__":
