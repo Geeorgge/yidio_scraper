@@ -20,31 +20,6 @@ def extract_title(soup):
         if title_elem:
             title = title_elem.text.strip().replace('Watch ', '')
             return title
-        
-    return None
-
-def extract_imdb_rating(soup):
-    imdb_rating_div = soup.select_one('ul.attributes > li.imdb')
-    if imdb_rating_div:
-        imdb_rating_span = imdb_rating_div.select_one('span')
-        if imdb_rating_span:
-            imdb_rating_span.decompose()
-        imdb_rating = imdb_rating_div.text.strip()
-        return imdb_rating
-    return None
-
-def extract_year(soup):
-    year_elem = soup.select_one('ul.attributes > li:nth-of-type(2)')
-    if year_elem:
-        year = year_elem.text.strip()
-        return year
-    return None
-
-def extract_length(soup):
-    length_elem = soup.select_one('ul.attributes > li:nth-of-type(3)')
-    if length_elem:
-        length = length_elem.text.strip()
-        return length
     return None
 
 def extract_classification(soup):
@@ -53,9 +28,43 @@ def extract_classification(soup):
         classification = classification_elem.text.strip()
         allowed_classifications = ["R", "PG-13", "PG", "G", "NC-17", "NR"]
         if classification not in allowed_classifications:
-            classification = None
+            classification = None 
         return classification
-    return None
+    return None 
+
+def extract_year(soup):
+    year_elem = soup.select_one('ul.attributes > li:nth-of-type(2)')
+    if year_elem:
+        year = year_elem.text.strip()
+        if year.isdigit() and len(year) == 4:
+            return year
+        year_elem = soup.select_one('ul.attributes > li:nth-of-type(1)')
+        year = year_elem.text.strip()
+        return year
+
+    return 'Unknown'  
+
+def extract_length(soup):
+    length_elem = soup.select_one('ul.attributes > li:nth-of-type(3)')
+    if length_elem:
+        length = length_elem.text.strip()
+        if re.match(r'^\d+ hr \d+ min$', length):  # Asegurarse de que el formato es correcto
+            return length
+    return None 
+
+def extract_imdb_rating(soup):
+    imdb_rating_div = soup.select_one('ul.attributes > li.imdb')
+    if imdb_rating_div:
+        imdb_rating_span = imdb_rating_div.select_one('span')
+        if imdb_rating_span:
+            imdb_rating_span.decompose()
+        imdb_rating = imdb_rating_div.text.strip()
+        try:
+            imdb_rating_float = float(imdb_rating)
+            return f"{imdb_rating_float:.1f}"  # Asegurar formato decimal con una cifra decimal
+        except ValueError:
+            pass
+    return '0.0'
 
 def extract_description(soup):
     description_elem = soup.select_one('div.description p')
@@ -67,7 +76,7 @@ def extract_description(soup):
             return description
         except UnicodeEncodeError as e:
             print("Error de codificación:", e)
-    return None
+    return ''
 
 def get_movie_info(url):
     response = requests.get(url)
@@ -75,10 +84,10 @@ def get_movie_info(url):
         soup = BeautifulSoup(response.content, 'html.parser')
         image = extract_image(soup)
         title = extract_title(soup)
-        imdb_rating = extract_imdb_rating(soup)
+        classification = extract_classification(soup)
         year = extract_year(soup)
         length = extract_length(soup)
-        classification = extract_classification(soup)
+        imdb_rating = extract_imdb_rating(soup)
         description = extract_description(soup)
         
         if image and title:
