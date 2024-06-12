@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_container
+    restart: always
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # add your own data here
+    environment:
+      MYSQL_ROOT_PASSWORD: 
+      MYSQL_DATABASE: 
+      MYSQL_USER: 
+      MYSQL_PASSWORD: 
+    ports:
+      - "3306:3306"
+    networks:
+      - default
+
+  #rabbitmq:
+  #  image: rabbitmq:3-management
+  #  container_name: rabbitmq_container
+  #  ports:
+  #    - "5672:5672"
+  #    - "15672:15672"
+  #  networks:
+  #    - default
+
+  web:
+    build: ./frontend
+    container_name: react_container
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/frontend
+    networks:
+      - default
+
+  api:
+    build: ./api
+    container_name: django_container
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api:/api
+    command: ["./wait-for-db.sh", "db", "python", "manage.py", "runserver", "0.0.0.0:8000"]
+    depends_on:
+      - db
+      # add your own data here
+    environment:
+      DB_NAME: 
+      DB_USER: 
+      DB_PASSWORD: 
+      DB_HOST: db
+      DB_PORT: 
+      DJANGO_SETTINGS_MODULE: backend.settings
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  mysql_data:
