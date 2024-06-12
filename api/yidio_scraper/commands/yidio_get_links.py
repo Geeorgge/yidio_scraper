@@ -1,8 +1,9 @@
 import requests
 
-# Funct to extract the links of the movies
+# Funct to extract the movie links
 def get_movie_links(url):
-    params = {"type": "movie", "index": "0", "limit": "50000"}
+    # Edit limit for more links (the limit is 50k)
+    params = {"type": "movie", "index": "0", "limit": "1000"}
     movie_links = []
 
     try:
@@ -19,7 +20,7 @@ def get_movie_links(url):
         print("An error occurred during the request:", e)
         return []
 
-#Save the links in a txt file
+# Save links in a txt file
 def save_links_to_file(links, file_name):
     try:
         with open(file_name, 'w') as file:
@@ -29,13 +30,3 @@ def save_links_to_file(links, file_name):
     except Exception as e:
         print("An error occurred while saving links to file:", e)
 
-if __name__ == "__main__":
-    url = "https://www.yidio.com/"
-    movie_links = get_movie_links(url)
-    
-    if movie_links:
-        output_file = "links.txt"
-        save_links_to_file(movie_links, output_file)
-        print(f"Movie links have been saved to '{output_file}'.")
-    else:
-        print("No movie links found.")
