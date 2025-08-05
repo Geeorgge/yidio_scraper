@@ -11,6 +11,7 @@ class Movie(models.Model):
 
 class Meta:
         db_table = 'movies'
+        unique_together = ('title', 'year', 'length')
 
 def __str__(self):
     return self.title
