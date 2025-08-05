@@ -40,16 +40,12 @@ class YidioScraper:
 
     # Funct to extract the year movie
     def extract_year(self, soup):
-        year_elem = soup.select_one('ul.attributes > li:nth-of-type(2)')
-        if year_elem:
-            year = year_elem.text.strip()
-            if year.isdigit() and len(year) == 4:
-                return year
-            year_elem = soup.select_one('ul.attributes > li:nth-of-type(1)')
-            year = year_elem.text.strip()
-            return year
-
-        return 'Unknown'  
+        attributes = soup.select('ul.attributes > li')
+        for li in attributes:
+            text = li.text.strip()
+            if re.match(r'^\d{4}$', text):
+                return int(text)
+        return None
 
     # Funct to extract the length movie
     def extract_length(self, soup):

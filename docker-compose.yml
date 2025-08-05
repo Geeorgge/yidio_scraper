@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   db:
@@ -34,6 +33,7 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend:/frontend
+      - /frontend/node_modules
     networks:
       - default
 
@@ -44,16 +44,14 @@ services:
       - "8000:8000"
     volumes:
       - ./api:/api
-    command: ["./wait-for-db.sh", "db", "python", "manage.py", "runserver", "0.0.0.0:8000"]
     depends_on:
       - db
-      # add your own data here
     environment:
-      DB_NAME: 
-      DB_USER: 
-      DB_PASSWORD: 
+      DB_NAME: yidio_db
+      DB_USER: main_yidio
+      DB_PASSWORD: 2526
       DB_HOST: db
-      DB_PORT: 
+      DB_PORT: 3306
       DJANGO_SETTINGS_MODULE: backend.settings
     networks:
       - default
