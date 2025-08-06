@@ -5,3 +5,4 @@ mysqlclient>=2.0
 mysql-connector-python
 requests
 bs4
+django-cors-headers
