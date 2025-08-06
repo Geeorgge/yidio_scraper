@@ -1,10 +1,12 @@
-from .views import MovieListAPIView
+from .views import YidioMovieListAPIView, YidioMovieViewSet
 from django.urls import path, include
-from .views import MovieViewSet, movie_list
 from rest_framework.routers import DefaultRouter
 
 
+router = DefaultRouter()
+router.register(r'yidio-movies', YidioMovieViewSet)
+
 urlpatterns = [
-    path('api/movies/', MovieListAPIView.as_view(), name='movie-list'),
-    path('movies/', movie_list, name='movie_list.html'),
+    path('', include(router.urls)),
+    path('api/yidio-movie-list/', YidioMovieListAPIView.as_view(), name='yidio-movie-list'),
 ]

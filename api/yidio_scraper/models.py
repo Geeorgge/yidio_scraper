@@ -1,6 +1,6 @@
 from django.db import models
 
-class Movie(models.Model):
+class YidioMovie(models.Model):
     title = models.CharField(max_length=255)
     image = models.CharField(max_length=512)
     classification = models.CharField(max_length=10, default="NR", null=True, blank=True)
@@ -10,7 +10,7 @@ class Movie(models.Model):
     description = models.TextField()
 
     class Meta:
-            db_table = 'movies'
+            db_table = 'yidio_scraper_movie'
             unique_together = ('title', 'year', 'length')
 
     def __str__(self):
