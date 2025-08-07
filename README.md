@@ -86,3 +86,4 @@ Users can filter movies by:
 - All parsing is done in batches and includes retry logic to handle transient errors.
 - You can preprocess and clean scraped text before storage or display.
 
+
