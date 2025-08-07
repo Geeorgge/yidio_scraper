@@ -46,8 +46,8 @@ This project scrapes movie data from Yidio.com and exposes it through a Django R
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/yidio-movie-scraper.git
-cd yidio-movie-scraper
+git clone https://github.com/your-username/yidio-scraper.git
+cd yidio-scraper
 ```
 
 ### 2. Build and run the containers
