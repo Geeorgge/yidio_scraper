@@ -11,23 +11,22 @@ def get_movie_links(url, file_name="links.txt"):
 
     # Request new links from API
     params = {"type": "movie", "index": "0", "limit": "60000"}
-    movie_links = []
+    movie_links = set()
 
     try:
         with requests.get(url, params=params, timeout=10) as response:
             if response.status_code == 200:
                 json_data = response.json()
                 for item in json_data['response']:
-                    link = item['url']
-                    if link not in existing_links:
-                        movie_links.append(link)
-                return movie_links
+                    movie_links.add(item['url'])  # avoid duplicates 
             else:
                 print("Error fetching the page:", response.status_code)
-                return []
     except requests.RequestException as e:
         print("An error occurred during the request:", e)
-        return []
+
+    # return only new links
+    new_links = list(movie_links - existing_links)
+    return new_links, movie_links.union(existing_links)
 
 # Function to append only new links to file
 def save_links_to_file(links, file_name):
@@ -36,10 +35,9 @@ def save_links_to_file(links, file_name):
         return
 
     try:
-        with open(file_name, 'a') as file:
-            for link in links:
+        with open(file_name, 'w') as file:  # sobreescribe, no añade
+            for link in sorted(links):  # orden opcional
                 file.write(link + '\n')
-        print(f"Appended {len(links)} new links to '{file_name}'.")
+        print(f"Saved {len(links)} total links to '{file_name}'.")
     except Exception as e:
         print("An error occurred while saving links to file:", e)
-    

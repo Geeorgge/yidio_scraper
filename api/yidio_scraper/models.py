@@ -1,6 +1,6 @@
 from django.db import models
 
-class Movie(models.Model):
+class YidioMovie(models.Model):
     title = models.CharField(max_length=255)
     image = models.CharField(max_length=512)
     classification = models.CharField(max_length=10, default="NR", null=True, blank=True)
@@ -10,8 +10,13 @@ class Movie(models.Model):
     description = models.TextField()
 
     class Meta:
-            db_table = 'movies'
-            unique_together = ('title', 'year', 'length')
+        db_table = 'yidio_scraper_movie'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'year', 'length'],
+                name='yidio_scraper_movie_title_year_length_uniq'
+            )
+        ]
 
     def __str__(self):
         return self.title

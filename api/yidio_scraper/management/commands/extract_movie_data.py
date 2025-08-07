@@ -1,7 +1,7 @@
 import os
 import logging
 import time
-from yidio_scraper.models import Movie
+from yidio_scraper.models import YidioMovie as Movie
 from django.core.management.base import BaseCommand
 from yidio_scraper.commands.yidio_db import save_to_database
 from yidio_scraper.commands.yidio_scraper import YidioScraper
@@ -23,15 +23,17 @@ class Command(BaseCommand):
             with open(output_file, 'r') as file:
                 existing_links = set(line.strip() for line in file if line.strip())
 
-        # Fetch new links and filter only the unseen ones
-        new_links = get_movie_links(url, file_name=output_file)
-        unseen_links = [link for link in new_links if link not in existing_links]
+        # Fetch all and new links
+        new_links, all_links = get_movie_links(url, file_name=output_file)
 
-        # Save only unseen links to file
-        save_links_to_file(unseen_links, output_file)
+        # Save links without duplicates
+        save_links_to_file(all_links, output_file)
 
         # Combine all links to process (existing + new)
         all_links = list(existing_links.union(unseen_links))
+
+        # Process only new links
+        unseen_links =  new_links
 
         # Init scraper
         yidio_scraper = YidioScraper()
@@ -59,22 +61,26 @@ class Command(BaseCommand):
                 logger.warning(f"Missing title or year in: {link} — skipping")
                 continue
 
-            if Movie.objects.filter(title=movie_info.title, year=movie_info.year).exists():
-                logger.info(f"Movie already exists in DB: {movie_info.title} ({movie_info.year})")
-                continue
-
-            movie = Movie(
-                title=movie_info.title,
-                image=movie_info.image,
-                classification=movie_info.classification or '',
+            # Save to DB if not exists
+            movie, created = Movie.objects.get_or_create(
+                title=movie_info.title.strip(),
                 year=movie_info.year,
-                length=movie_info.length or '',
-                imdb_rating=movie_info.imdb_rating or None,
-                description=movie_info.description or ''
+                length=(movie_info.length or '').strip(),
+                defaults={
+                    'image': movie_info.image,
+                    'classification': movie_info.classification or '',
+                    'imdb_rating': movie_info.imdb_rating or 0.0,
+                    'description': movie_info.description or ''
+                }
             )
-            movie.save()
-            movies_list.append(movie)
-            logger.info(f"Saved movie: {movie.title} ({movie.year})")
+
+            # Log results
+            if created:
+                movies_list.append(movie)
+                logger.info(f"✅ New movie saved: {movie.title} ({movie.year})")
+            else:
+                logger.info(f"⚠️ Movie already exists: {movie.title} ({movie.year}) — skipped")
+
 
         # Save final results
         if movies_list:

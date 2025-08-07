@@ -25,7 +25,7 @@ function App() {
   useEffect(() => {
     const offset = (page - 1) * limit;
     const searchParam = debouncedSearch ? `&search=${encodeURIComponent(debouncedSearch)}` : '';
-    const url = `http://localhost:8000/api/movies/?limit=${limit}&offset=${offset}${searchParam}`;
+    const url = `http://localhost:8000/api/yidio-movies/?limit=${limit}&offset=${offset}${searchParam}`;
 
     setLoading(true);
     console.log("Fetching:", url);
