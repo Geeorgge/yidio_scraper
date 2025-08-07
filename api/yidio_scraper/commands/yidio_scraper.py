@@ -2,7 +2,7 @@ import re
 import csv
 import requests
 from bs4 import BeautifulSoup
-from yidio_scraper.models import Movie
+from yidio_scraper.models import YidioMovie as Movie
 
 class YidioScraper:
 

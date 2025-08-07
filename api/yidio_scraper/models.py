@@ -10,8 +10,13 @@ class YidioMovie(models.Model):
     description = models.TextField()
 
     class Meta:
-            db_table = 'yidio_scraper_movie'
-            unique_together = ('title', 'year', 'length')
+        db_table = 'yidio_scraper_movie'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'year', 'length'],
+                name='yidio_scraper_movie_title_year_length_uniq'
+            )
+        ]
 
     def __str__(self):
         return self.title
