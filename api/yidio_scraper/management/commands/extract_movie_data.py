@@ -7,15 +7,22 @@ from yidio_scraper.commands.yidio_db import save_to_database
 from yidio_scraper.commands.yidio_scraper import YidioScraper
 from yidio_scraper.commands.yidio_get_links import get_movie_links, save_links_to_file
 
-# Set up a logger for this command
+# Setup logger with console output
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
+if not logger.hasHandlers():
+    logger.addHandler(console_handler)
 
 class Command(BaseCommand):
     help = 'Extracts movie data from Yidio and stores it in the database.'
 
     def handle(self, *args, **kwargs):
         url = "https://www.yidio.com/redesign/json/browse_results.php"
-        output_file = "links.txt"
+        output_file = "links2.txt"
+
+        logger.info("📥 Getting links from Yidio...")
 
         # Load existing links from file
         existing_links = set()
@@ -23,25 +30,28 @@ class Command(BaseCommand):
             with open(output_file, 'r') as file:
                 existing_links = set(line.strip() for line in file if line.strip())
 
-        # Fetch all and new links
-        new_links, all_links = get_movie_links(url, file_name=output_file)
+        # Fetch links (IMPORTANT: ensure the return order is correct)
+        all_links, new_links = get_movie_links(url, file_name=output_file)
 
-        # Save links without duplicates
+        # Save links to file
         save_links_to_file(all_links, output_file)
 
-        # Combine all links to process (existing + new)
-        all_links = list(existing_links.union(unseen_links))
+        # Determine unseen new links
+        unseen_links = set(new_links) - existing_links
+        limited_links = list(unseen_links)
 
-        # Process only new links
-        unseen_links =  new_links
+        if not limited_links:
+            logger.warning("No new unseen links to process.")
+            return
+
+        logger.info(f"🔗 Found {len(limited_links)} new links to process.")
 
         # Init scraper
         yidio_scraper = YidioScraper()
         movies_list = []
 
-        # Loop through all links
-        for link in all_links:
-            logger.info(f"Processing movie page: {link}")
+        for link in limited_links:
+            logger.info(f"🎬 Processing movie: {link}")
             movie_info = None
 
             for attempt in range(3):
@@ -58,35 +68,47 @@ class Command(BaseCommand):
                 continue
 
             if not movie_info.title or not movie_info.year:
-                logger.warning(f"Missing title or year in: {link} — skipping")
+                logger.warning(f"⚠️ Missing title or year in: {link} — skipping")
                 continue
 
             # Save to DB if not exists
-            movie, created = Movie.objects.get_or_create(
+            movie, created = Movie.objects.update_or_create(
                 title=movie_info.title.strip(),
                 year=movie_info.year,
                 length=(movie_info.length or '').strip(),
                 defaults={
-                    'image': movie_info.image,
-                    'classification': movie_info.classification or '',
-                    'imdb_rating': movie_info.imdb_rating or 0.0,
-                    'description': movie_info.description or ''
-                }
+                'image': movie_info.image,
+                'classification': movie_info.classification or '',
+                'imdb_rating': float(movie_info.imdb_rating) if movie_info.imdb_rating else None,
+                'description': movie_info.description or '',
+                'tagline': movie_info.tagline or '',
+                'genres': movie_info.genres or '',
+                'cast': movie_info.cast or '',
+                'director': movie_info.director or '',
+                'where_to_watch': movie_info.where_to_watch or '',
+                'mpaa_rating': movie_info.mpaa_rating or '',
+                'metascore': int(movie_info.metascore) if movie_info.metascore and movie_info.metascore.isdigit() else None,
+                'background_image': movie_info.background_image or yidio_scraper.extract_background_image_from_poster(movie_info.image, movie_info.movie_id)
+            }
             )
-
-            # Log results
             if created:
                 movies_list.append(movie)
-                logger.info(f"✅ New movie saved: {movie.title} ({movie.year})")
+                logger.info(f"✅ Saved: {movie.title} ({movie.year})")
             else:
-                logger.info(f"⚠️ Movie already exists: {movie.title} ({movie.year}) — skipped")
+                # only update if mpaa_rating or metascore are present
+                if movie_info.mpaa_rating or movie_info.metascore:
+                    movie.mpaa_rating = movie_info.mpaa_rating
+                    movie.metascore = movie_info.metascore
+                    movies_list.append(movie)
+                    logger.info(f"♻️ Update queued for: {movie.title} ({movie.year})")
+                else:
+                    logger.info(f"↪️ Already exists: {movie.title} ({movie.year})")
 
-
-        # Save final results
-        if movies_list:
-            yidio_scraper.save_to_csv(movies_list)
-            save_to_database(movies_list)
-            for movie in movies_list:
-                self.stdout.write(self.style.SUCCESS(f'Saved: {movie.title}'))
+            # Save to CSV if needed
+            if movies_list:
+                yidio_scraper.save_to_csv(movies_list)
+                save_to_database(movies_list)
+                for movie in movies_list:
+                    self.stdout.write(self.style.SUCCESS(f'Saved to csv: {movie.title}'))
 
         self.stdout.write(self.style.SUCCESS("✅ Movie data extraction completed successfully."))
