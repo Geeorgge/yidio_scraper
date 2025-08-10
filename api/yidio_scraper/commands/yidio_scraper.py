@@ -5,6 +5,9 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from yidio_scraper.models import YidioMovie
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 
 class YidioScraper:
@@ -165,7 +168,7 @@ class YidioScraper:
         )
 
         driver.get(url)
-        time.sleep(3)
+        time.sleep(1)
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
         # MPAA Rating y Metascore
