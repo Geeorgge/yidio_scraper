@@ -16,10 +16,13 @@ RUN apt-get update && apt-get install -y \
 # Install python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all files (including the script)
+# Install additional dependencies
+RUN pip install selenium
+
+# Copy all project files
 COPY . .
 
-# Make sure wait-for-db.sh is executable
+# Make wait-for-db.sh executable
 RUN chmod +x /api/wait-for-db.sh
 
 # Set environment variable
@@ -28,8 +31,8 @@ ENV DJANGO_SETTINGS_MODULE=backend.settings
 # Expose port
 EXPOSE 8000
 
-# Entrypoint for waiting DB
+# Entry point: wait for DB before running
 ENTRYPOINT ["/api/wait-for-db.sh"]
 
-# Start command
+# Corrected CMD: start Django dev server
 CMD ["db", "python", "manage.py", "runserver", "0.0.0.0:8000"]
