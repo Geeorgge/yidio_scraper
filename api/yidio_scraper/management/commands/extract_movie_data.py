@@ -5,7 +5,7 @@ from yidio_scraper.models import YidioMovie as Movie
 from django.core.management.base import BaseCommand
 from yidio_scraper.commands.yidio_db import save_to_database
 from yidio_scraper.commands.yidio_scraper import YidioScraper
-from yidio_scraper.commands.yidio_get_links import get_movie_links, save_links_to_file
+from yidio_scraper.commands.yidio_get_links import get_movie_links
 
 # Setup logger with console output
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         url = "https://www.yidio.com/redesign/json/browse_results.php"
-        output_file = "links2.txt"
+        output_file = "links.txt"
 
         logger.info("📥 Getting links from Yidio...")
 
@@ -33,8 +33,9 @@ class Command(BaseCommand):
         # Fetch links (IMPORTANT: ensure the return order is correct)
         all_links, new_links = get_movie_links(url, file_name=output_file)
 
-        # Save links to file
-        save_links_to_file(all_links, output_file)
+        if not all_links:
+            logger.warning("No links found. Exiting.")
+            return
 
         # Determine unseen new links
         unseen_links = set(new_links) - existing_links
@@ -42,7 +43,10 @@ class Command(BaseCommand):
 
         if not limited_links:
             logger.warning("No new unseen links to process.")
-            return
+
+            # Continue with all existing links instead
+            limited_links = list(existing_links)
+            logger.info(f"🔁 Proceeding with {len(limited_links)} previously saved links.")
 
         logger.info(f"🔗 Found {len(limited_links)} new links to process.")
 
@@ -108,7 +112,5 @@ class Command(BaseCommand):
             if movies_list:
                 yidio_scraper.save_to_csv(movies_list)
                 save_to_database(movies_list)
-                for movie in movies_list:
-                    self.stdout.write(self.style.SUCCESS(f'Saved to csv: {movie.title}'))
 
         self.stdout.write(self.style.SUCCESS("✅ Movie data extraction completed successfully."))
