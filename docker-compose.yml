@@ -1,4 +1,3 @@
-
 services:
   db:
     image: mysql:8.0
@@ -55,6 +54,13 @@ services:
       DJANGO_SETTINGS_MODULE: backend.settings
     networks:
       - default
+
+  selenium:
+    image: selenium/standalone-chrome
+    container_name: selenium_chrome
+    ports:
+      - "4444:4444"
+    shm_size: "2gb"
 
 networks:
   default:
