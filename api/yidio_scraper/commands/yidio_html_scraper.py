@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from yidio_scraper.models import YidioMovie
 
 
-class YidioScraper:
+class YidioHtmlScraper:
 
     # Funct to extract the image movie
     def extract_image(self, soup):
