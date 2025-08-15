@@ -16,15 +16,6 @@ services:
     networks:
       - default
 
-  #rabbitmq:
-  #  image: rabbitmq:3-management
-  #  container_name: rabbitmq_container
-  #  ports:
-  #    - "5672:5672"
-  #    - "15672:15672"
-  #  networks:
-  #    - default
-
   web:
     build:
       context: ./frontend
@@ -46,15 +37,15 @@ services:
       - "8000:8000"
     volumes:
       - ./api:/app
-      - /path/yidio_scraper/api/movie_htmls:/app/movie_htmls
+      - /path_to_your_local_html_files:/app/movie_htmls
     depends_on:
       - db
     environment:
-      DB_NAME: yidio_db
-      DB_USER: main_yidio
-      DB_PASSWORD: 2526
-      DB_HOST: db
-      DB_PORT: 3306
+      DB_NAME: 
+      DB_USER: 
+      DB_PASSWORD: 
+      DB_HOST: 
+      DB_PORT: 
       DJANGO_SETTINGS_MODULE: backend.settings
     networks:
       - default
