@@ -25,7 +25,9 @@ function App() {
 
   useEffect(() => {
     const offset = (page - 1) * limit;
-    const searchParam = debouncedSearch ? `&search=${encodeURIComponent(debouncedSearch)}` : "";
+    const searchParam = debouncedSearch
+      ? `&search=${encodeURIComponent(debouncedSearch)}`
+      : "";
     const url = `http://localhost:8000/api/yidio-movies/?limit=${limit}&offset=${offset}${searchParam}`;
 
     setLoading(true);
@@ -50,9 +52,13 @@ function App() {
   const totalPages = Math.ceil(totalMovies / limit);
 
   return (
-    <div className="min-h-screen text-white to-black px-4 py-8"
-      style={{ background: "linear-gradient(to right, #0f2027, #203a43, #2c5364"}}>
-      <h1 className="text-4xl font-bold mb-6 text-center">🎬 Movie Explorer</h1>
+    <div
+      className="min-h-screen text-white to-black px-4 py-8"
+      style={{
+        background: "linear-gradient(to right, #0f0c29, #302b63, #24243e",
+      }}
+    >
+      <h1 className="text-4xl font-bold mb-6 text-center">🎬 Cinema +</h1>
 
       {isMovieList && (
         <div className="flex justify-center mb-6">
@@ -84,7 +90,9 @@ function App() {
           >
             Prev
           </button>
-          <span className="self-center">Page {page} of {totalPages}</span>
+          <span className="self-center">
+            Page {page} of {totalPages}
+          </span>
           <button
             onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={page === totalPages}
