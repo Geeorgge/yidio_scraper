@@ -58,7 +58,7 @@ function App() {
         background: "linear-gradient(to right, #0f0c29, #302b63, #24243e",
       }}
     >
-      <h1 className="text-4xl font-bold mb-6 text-center">🎬 Movie Explorer</h1>
+      <h1 className="text-4xl font-bold mb-6 text-center">🎬 Cinema +</h1>
 
       {isMovieList && (
         <div className="flex justify-center mb-6">
