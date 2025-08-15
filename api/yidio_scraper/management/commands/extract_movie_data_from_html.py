@@ -4,7 +4,7 @@ import time
 from yidio_scraper.models import YidioMovie as Movie
 from django.core.management.base import BaseCommand
 from yidio_scraper.commands.yidio_db import save_to_database
-from yidio_scraper.commands.yidio_scraper import YidioScraper
+from yidio_scraper.commands.yidio_html_scraper import YidioHtmlScraper
 
 # Setup logger with console output
 logger = logging.getLogger(__name__)
@@ -108,7 +108,7 @@ class Command(BaseCommand):
         logger.info(f"🎯 Processing {len(unprocessed_files)} HTML files...")
 
         # Init scraper
-        yidio_scraper = YidioScraper()
+        yidio_scraper = YidioHtmlScraper()
         movies_list = []
         processed_count = 0
         errors_count = 0

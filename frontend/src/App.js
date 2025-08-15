@@ -1,43 +1,42 @@
 import React, { useState, useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 import MovieList from "./components/MovieList";
+import MovieDetail from "./components/MovieDetail";
 import "./App.css";
 
 function App() {
-  const [movies, setMovies] = useState([]); // Movies state
-  const [page, setPage] = useState(1); // Current page
-  const [totalMovies, setTotalMovies] = useState(0); // Total movies from API
-  const [searchTerm, setSearchTerm] = useState(""); // Search term state
-  const [debouncedSearch, setDebouncedSearch] = useState("");  // Debounced search term
-  const [loading, setLoading] = useState(false); // Loading state
-  const limit = 12; // Pages per page
+  const [movies, setMovies] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalMovies, setTotalMovies] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const limit = 35;
 
-  // Debounce effect (waits 500ms before updating the search term)
+  const location = useLocation();
+  const isMovieList = location.pathname === "/";
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);
     }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    return () => clearTimeout(handler);
   }, [searchTerm]);
 
   useEffect(() => {
     const offset = (page - 1) * limit;
-    const searchParam = debouncedSearch ? `&search=${encodeURIComponent(debouncedSearch)}` : '';
+    const searchParam = debouncedSearch ? `&search=${encodeURIComponent(debouncedSearch)}` : "";
     const url = `http://localhost:8000/api/yidio-movies/?limit=${limit}&offset=${offset}${searchParam}`;
 
     setLoading(true);
-    console.log("Fetching:", url);
     fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        console.log("Fetched data:", data);
+      .then((res) => res.json())
+      .then((data) => {
         setMovies(data.results || []);
         setTotalMovies(data.count || 0);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Error fetching movies:", err);
         setLoading(false);
       });
@@ -45,32 +44,38 @@ function App() {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setPage(1); // Reset to first page on search
+    setPage(1);
   };
 
   const totalPages = Math.ceil(totalMovies / limit);
 
   return (
-    <div className="min-h-screen text-white bg-gradient-to-r from-gray-900 via-gray-800 to-black p-8">
+    <div className="min-h-screen text-white to-black px-4 py-8"
+      style={{ background: "linear-gradient(to right, #0f2027, #203a43, #2c5364"}}>
       <h1 className="text-4xl font-bold mb-6 text-center">🎬 Movie Explorer</h1>
 
-      <div className="flex justify-center mb-6">
-        <input
-          type="text"
-          placeholder="Search by title..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          className="px-4 py-2 rounded w-96 text-black"
-        />
-      </div>
-
-      {loading ? (
-        <p className="text-center">Loadin movies...</p>
-      ) : (
-        <MovieList movies={movies} />
+      {isMovieList && (
+        <div className="flex justify-center mb-6">
+          <input
+            type="text"
+            placeholder="Search by title..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="px-4 py-2 rounded w-96 text-black"
+          />
+        </div>
       )}
 
-      {!loading && movies.length > 0 && (
+      {loading ? (
+        <p className="text-center">Loading movies...</p>
+      ) : (
+        <Routes>
+          <Route path="/" element={<MovieList movies={movies} />} />
+          <Route path="/movies/:id" element={<MovieDetail />} />
+        </Routes>
+      )}
+
+      {isMovieList && !loading && movies.length > 0 && (
         <div className="flex justify-center mt-6 gap-4">
           <button
             onClick={() => setPage((prev) => Math.max(prev - 1, 1))}

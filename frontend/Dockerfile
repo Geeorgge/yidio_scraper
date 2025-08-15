@@ -1,20 +1,21 @@
+# Use a specific Node.js version for consistency
 FROM node:20
 
-# Set the work directory
-WORKDIR /frontend
+# Set the working directory inside the container
+WORKDIR /app
 
-# Copy the package.json and package-lock.json files in the work dir
-COPY package*.json ./
+# Copy package.json and package-lock.json first to leverage Docker cache
+COPY package.json package-lock.json ./
 
-# Install project dependencies
-RUN npm install
+# Install dependencies
+# Using npm ci for a clean install based on package-lock.json
+RUN npm ci
 
-# Copy the project code to the work dir
+# Copy the rest of the application code
 COPY . .
 
-# Expose the port
+# Expose the port the app runs on
 EXPOSE 3000
 
-# Command to execute react
+# Command to run the application
 CMD ["npm", "start"]
- 
